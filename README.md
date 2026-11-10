@@ -1,3 +1,13 @@
+# 🧱 BrickBurst
+
+A colourful browser arcade game that turns each attempt into an opportunity to learn and improve.
+
+## 🎮 Play Now
+
+**[▶ Play BrickBurst](https://gfolomo.github.io/BrickBurst/)**
+
+Move the paddle with your mouse or finger, break the bricks, and explore your gameplay insights. No account or installation is required.
+
 ## 📊 Data Analytics Behind BrickBurst
 
 BrickBurst is a browser game that turns gameplay data into visual feedback. It demonstrates how data analytics can help players understand their performance, recognize patterns, and decide what to try next.
@@ -52,3 +62,7 @@ The visualisations describe **what happened**, rather than proving **why it happ
 - **Actionable communication:** translating findings into short, practical gameplay tips.
 
 BrickBurst applies data analytics to an interactive experience, helping players turn each attempt into an opportunity to learn and improve.
+
+## 📱 Coming Next
+
+An Android / Google Play version is planned for the future. The game is currently available in your browser; no Android release date has been announced.
