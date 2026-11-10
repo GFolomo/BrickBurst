@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BrickBurst</title>
+<meta name="description" content="BrickBurst is a colorful browser Breakout game with 5 levels, power-ups, combos and sound. Play free on desktop or phone.">
+<style>
+:root{--bg:#f1f0fa;--fg:#1d1a3a;--panel:#191641;--btn:#ff4f8b;--btn-fg:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e0c22;--fg:#f1f0fa}}
+:root[data-theme="dark"]{--bg:#0e0c22;--fg:#f1f0fa}
+html,body{margin:0;background:var(--bg);color:var(--fg);font-family:"Trebuchet MS",Verdana,sans-serif}
+body{display:flex;flex-direction:column;align-items:center;padding:12px}
+h1{margin:0 0 8px;font-size:2rem;letter-spacing:.04em}
+.bar{width:100%;max-width:720px;display:flex;flex-wrap:wrap;gap:8px 16px;justify-content:space-between;align-items:center;margin-bottom:10px;font-weight:700}
+.btns{display:flex;gap:8px}
+button{font:inherit;font-weight:700;background:var(--btn);color:var(--btn-fg);border:0;border-radius:999px;padding:6px 16px;cursor:pointer}
+button:focus-visible{outline:3px solid var(--fg);outline-offset:2px}
+canvas{width:100%;max-width:720px;aspect-ratio:3/2;background:var(--panel);border-radius:12px;cursor:none;touch-action:none;display:block}
+p{max-width:720px;margin:10px 0 0;text-align:center;font-size:.9rem;opacity:.8}
+
+dialog{color:#f1f0fa;background:#191641;border:0;border-radius:20px;padding:24px;width:min(720px,calc(100% - 64px));max-height:88dvh;overflow:auto;text-align:center;box-shadow:0 24px 100px #0008}
+dialog::backdrop{background:#09071bc9}dialog h2{margin:0 0 6px;font-size:clamp(1.6rem,4vw,2.2rem)}
+.sub{color:#cbc7df;margin-bottom:16px;font-size:.95rem}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.stat{background:#302b55;border-radius:13px;padding:14px 4px}.stat strong{display:block;font-size:1.65rem}.stat span{display:block;color:#cbc7df;font-size:.8rem;margin-top:5px}
+.result-chart h3{font-size:1rem;margin:20px 0 8px}.level-bars{display:flex;gap:14px;height:145px;align-items:end;padding:0 15px}.level-bar{flex:1;min-width:0;font-size:.8rem}.level-bar i{display:block;width:85%;margin:6px auto 8px;border-radius:10px 10px 5px 5px}.level-bar small{color:#c8c3df}.miss-strip{display:flex;gap:3px;height:30px;border-radius:10px;overflow:hidden}.miss-cell{flex:1;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:bold}.strip-labels{display:flex;justify-content:space-between;color:#cbc7df;font-size:.75rem;margin-top:5px}.insight{margin:10px 0 0;color:#ded9ee;font-size:.9rem}.badge{display:inline-block;color:#8af1d2;background:#253d43;border-radius:99px;padding:6px 12px;font-size:.8rem;margin-top:14px}.tip{color:#fff2b6;font-size:.9rem;margin:12px 0;line-height:1.4}.actions{display:flex;justify-content:center;gap:10px;margin-top:14px}.secondary{background:#403967;font-size:.8rem}button{padding:9px 16px}.portfolio{max-width:720px;color:var(--fg);margin:12px 0;font-size:.75rem;text-align:center;opacity:.7}
+@media(max-width:540px){dialog{padding:18px;width:calc(100% - 52px)}.stats{grid-template-columns:repeat(2,1fr)}.stat{padding:10px 4px}.stat strong{font-size:1.4rem}.level-bars{gap:6px;padding:0;height:125px}.bar{font-size:.85rem}.btns{flex-wrap:wrap}.sub{font-size:.85rem}}
+.hotspot-wrap{max-width:390px;margin:auto}.hotspot-court{position:relative;background:#100e28;border:1px solid #51496f;border-radius:12px;padding:8px;overflow:hidden}.hotspot-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:3px;aspect-ratio:3/2}.hotspot-cell{border-radius:4px;position:relative}.hotspot-cell.hottest{outline:2px solid #fff;outline-offset:-2px;box-shadow:0 0 12px #ffd66b80}.hotspot-cell.hottest::after{content:'★';position:absolute;inset:0;display:grid;place-items:center;color:#211638;font-size:clamp(10px,2vw,17px)}.court-top,.court-bottom{position:absolute;left:50%;transform:translateX(-50%);pointer-events:none;background:#100e28c9;color:#fff;font-size:.6rem;letter-spacing:.12em;padding:3px 9px;border-radius:5px}.court-top{top:10px}.court-bottom{bottom:10px;border-bottom:3px solid #fff}.heat-key{display:flex;align-items:center;justify-content:center;gap:8px;color:#cbc7df;font-size:.7rem;margin:9px 0}.heat-ramp{width:100px;height:7px;border-radius:99px;background:linear-gradient(90deg,#272344,#7753b0,#f564a1,#ffdc75)}.hotspot-note{font-size:.85rem;color:#ded9ee;margin-top:6px;line-height:1.4}
+.results-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px}.results-grid .result-chart{background:#25204f;border:1px solid #403967;border-radius:14px;padding:14px;min-width:0}.results-grid .result-chart h3{margin-top:0}.results-grid .hotspot-wrap{max-width:none;margin:0}.results-grid .full{grid-column:1/-1}.contact{display:flex;gap:6px;align-items:end;height:110px;margin-top:15px}.contact div{flex:1;text-align:center;font-size:.7rem;color:#d5cfee}.contact i{display:block;background:#70e6cb;border-radius:5px 5px 0 0;min-height:3px;margin-bottom:7px}.history{display:flex;align-items:end;gap:8px;height:115px;margin:15px 0 8px}.attempt{flex:1;min-width:0;text-align:center;font-size:.7rem;color:#c8c3e2}.attempt i{display:block;background:#a78bfa;border-radius:5px 5px 0 0;margin:4px auto;width:80%;min-height:3px}.chart-note{color:#c8c3e2;font-size:.8rem;line-height:1.5;margin-top:12px}.stats{grid-template-columns:repeat(3,1fr)}dialog{width:min(840px,calc(100% - 64px))}@media(max-width:540px){.results-grid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<h1>BrickBurst</h1>
+<div class="bar">
+<span>Score <span id="score">0</span></span><span>Best <span id="best">0</span></span>
+<span>Level <span id="lvl">1</span>/5</span><span id="combo"></span><span id="lives"></span>
+<span class="btns"><button id="mute">Sound: on</button><button id="restart">Restart</button></span>
+</div>
+<canvas id="c" width="720" height="480" aria-label="BrickBurst game"></canvas>
+<p>Drag to steer, click or tap to launch. Catch capsules: W wide paddle, M multi-ball, S slow motion, + extra life. Orange bricks explode.</p>
+<div class="portfolio">A playful data project · Every bounce becomes a better next try.</div>
+<dialog id="results" aria-labelledby="result-title">
+<h2 id="result-title"></h2><div id="result-sub" class="sub"></div>
+<div id="result-stats" class="stats"></div>
+<div id="result-scope" class="chart-note"></div>
+<div class="results-grid">
+<section class="result-chart" aria-labelledby="points-title"><h3 id="points-title">Points per level</h3><div id="level-bars" class="level-bars"></div></section>
+<section class="result-chart" aria-labelledby="miss-title"><h3 id="miss-title">Where you missed</h3><div id="miss-strip" class="miss-strip"></div><div class="strip-labels"><span>Left</span><span>Middle</span><span>Right</span></div><div id="miss-note" class="insight"></div></section>
+<section class="result-chart hotspot-wrap" aria-labelledby="hotspot-title"><h3 id="hotspot-title">🔥 Ball hotspots</h3><div class="hotspot-court"><div id="hotspot-grid" class="hotspot-grid" role="img" aria-label="Ball travel heat map"></div><span class="court-top" aria-hidden="true">BRICKS</span><span class="court-bottom" aria-hidden="true">PADDLE</span></div><div class="heat-key"><span>Quick visits</span><span class="heat-ramp"></span><span>Hangout spots</span></div><div id="hotspot-note" class="hotspot-note"></div></section>
+<section class="result-chart" aria-labelledby="contact-title"><h3 id="contact-title">🏓 Your paddle contacts</h3><div id="contacts" class="contact"></div><div id="contact-note" class="chart-note"></div></section>
+<section class="result-chart full" aria-labelledby="history-title"><h3 id="history-title">📈 Attempt score trail</h3><div id="history" class="history"></div><div class="chart-note">Your latest 10 attempts this run. Each ends with a lost life or a cleared level.</div></section>
+</div>
+<div id="progress-badge" class="badge"></div><div id="tip" class="tip"></div>
+<div class="actions"><button id="continue">Continue →</button></div>
+</dialog>
+<script>
+const ENDPOINT=''; // optional: URL that accepts POSTed JSON events (Supabase, Firebase, etc.)
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=720,H=480;
+const COLORS=['#ff4f8b','#ff9f43','#ffd93d','#4ade80','#38bdf8','#a78bfa'];
+const TOUGH={2:'#c084fc',3:'#e5e7eb'};
+const LEVELS=[
+['1111111111','1111111111','1111111111','1111111111'],
+['2222222222','1111111111','1X1111X111','1111111111','1111111111'],
+['1.1.1.1.1.','2222222222','.X.X.X.X.X','1111111111','3333333333'],
+['3........3','23......32','123....321','11X2222X11','..111111..'],
+['3333333333','2X2X2X2X2X','2222222222','1X1X1X1X1X','1111111111','1111111111']];
+const BW=60,BH=22,GAP=6,OFFX=(W-(10*(BW+GAP)-GAP))/2,OFFY=50;
+const SID=Math.random().toString(36).slice(2,10);
+let variant;try{variant=localStorage.getItem('bb_variant')}catch(e){}
+if(!variant){variant=Math.random()<.5?'A':'B';try{localStorage.setItem('bb_variant',variant)}catch(e){}}
+const events=[];
+function log(type,data){
+  const ev={t:Date.now(),session:SID,variant,type,level,score,...data};
+  events.push(ev);
+  if(ENDPOINT)fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(ev),keepalive:true}).catch(()=>{});
+}
+let bricks,balls,items,parts,paddle,score,lives,level,state,combo,wide,slow,shake,best=0,levelStart,muted=false;
+const results=document.getElementById('results');
+let attempt,run,attemptHistory=[],pendingResult=null,lastReport=null,lastTick=0,newBest=false;
+function freshStats(){return {seconds:0,points:0,bricks:0,returns:0,powerups:0,bestCombo:0,longest:0,rally:0,heat:Array(96).fill(0),contacts:Array(5).fill(0),misses:Array(3).fill(0)}}
+function tally(key,n=1){attempt[key]+=n;run[key]+=n}
+function startAttempt(){attempt=freshStats();lastTick=performance.now()}
+function finishAttempt(){
+  const entry={...attempt,level,number:attemptHistory.length+1};
+  attemptHistory.push(entry);return entry;
+}
+function showResults(kind,entry){
+  pendingResult=kind;
+  const all=kind==='lost'||kind==='won',s=all?run:entry;
+  const levelPoints=LEVELS.map((_,i)=>attemptHistory.filter(a=>a.level===i+1).reduce((n,a)=>n+a.points,0));
+  lastReport={outcome:kind,level,score,lives,scope:all?'whole game':'attempt',stats:JSON.parse(JSON.stringify(s)),pointsPerLevel:levelPoints,attempts:JSON.parse(JSON.stringify(attemptHistory))};
+  const title=s.powerups>=3?'⚡ Power Hunter':s.bestCombo>=5?'🔥 Combo Star':s.longest>=5?'🛡️ Bounce Boss':s.bricks>=15?'🧱 Brick Blaster':'🌟 Rising Star';
+  document.getElementById('result-title').textContent=kind==='won'?'🏆 BrickBurst Champion':title;
+  document.getElementById('result-sub').textContent=all?    (kind==='won'?'All levels cleared!':'Game over.')+' Final score '+score+'.'+(newBest?' New best!':''):    (kind==='level'?'Level '+level+' cleared!':'Nice try! '+lives+' '+(lives===1?'life':'lives')+' left.')+' This attempt: '+s.points+' points.';
+  const seconds=Math.round(s.seconds),time=Math.floor(seconds/60)+'m '+String(seconds%60).padStart(2,'0')+'s';
+  document.getElementById('result-scope').textContent=all?'Whole-run stats & maps · Level scores cover this run.':'This attempt’s stats & maps · Level scores and attempt trail cover this run.';
+  const stats=[['🧱',s.bricks,'Bricks smashed'],['🔥',s.bestCombo,'Best combo'],['⚡',s.powerups,'Power-ups caught'],['⏱️',time,'Time played'],['🎯',s.points,'Points earned'],['🏓',s.returns,'Paddle returns']];
+  document.getElementById('result-stats').innerHTML=stats.map(([icon,value,label])=>'<div class="stat"><strong>'+icon+' '+value+'</strong><span>'+label+'</span></div>').join('');
+  const top=Math.max(...levelPoints,1);
+  document.getElementById('level-bars').innerHTML=levelPoints.map((n,i)=>'<div class="level-bar" aria-label="Level '+(i+1)+': '+(i+1>level?'not reached':n+' points')+'"><span>'+ (i+1>level?'—':n)+'</span><i style="height:'+Math.max(4,n/top*100)+'px;background:'+COLORS[i]+';opacity:'+(i+1>level?.2:1)+'"></i><small>Level '+(i+1)+'</small></div>').join('');
+  const misses=s.misses.reduce((a,b)=>a+b,0),peak=Math.max(...s.misses,1),names=['left','middle','right'];
+  document.getElementById('miss-strip').innerHTML=s.misses.map((n,i)=>'<div class="miss-cell" style="background:rgba(255,79,139,'+(misses?.15+.85*n/peak:.15)+')" aria-label="'+names[i]+': '+n+' misses">'+n+'</div>').join('');
+  const hot=s.misses.map((n,i)=>n===peak?i:-1).filter(i=>i>=0);
+  document.getElementById('miss-note').textContent=!misses?'No misses. Keep that rhythm!':hot.length===1?'Most misses: '+names[hot[0]]+'.':hot.length===3?'Misses spread evenly across the court.':'Most misses: '+hot.map(i=>names[i]).join(' & ')+'.';
+  const previous=attemptHistory.slice(0,-1).reverse().find(a=>a.level===level);
+  document.getElementById('progress-badge').textContent=all?newBest?'✨ Personal best!':'🎯 Best rally: '+s.longest+' returns':previous?entry.points>previous.points?'↗ '+(entry.points-previous.points)+' more points than your last try this level':entry.points===previous.points?'🤝 Matched your last try this level':'🎯 Best rally: '+s.longest+' returns':'🎯 Best rally: '+s.longest+' returns';
+  document.getElementById('tip').textContent=misses&&hot.length===1?['💡 Next try: move left a little earlier.','💡 Next try: get under the ball before it drops.','💡 Next try: move right a little earlier.'][hot[0]]:'💡 Next try: use paddle edges to reach the corners.';
+  document.getElementById('continue').textContent=all?'Play again ↻':kind==='level'?'Next level →':'Let’s go →';
+  renderHotspots(s.heat);
+  renderDetailedResults(s);
+  lastTick=0;results.showModal();document.getElementById('continue').focus();
+}
+function renderDetailedResults(s){
+  const labels=['Left edge','Left','Middle','Right','Right edge'],peak=Math.max(...s.contacts,1);
+  document.getElementById('contacts').innerHTML=s.contacts.map((n,i)=>'<div aria-label="'+labels[i]+': '+n+' contacts"><span>'+n+'</span><i style="height:'+Math.max(3,n/peak*65)+'px"></i>'+labels[i]+'</div>').join('');
+  document.getElementById('contact-note').textContent='Best rally: '+s.longest+' returns. Edge hits send the ball wider.';
+  const recent=attemptHistory.slice(-10),top=Math.max(...recent.map(a=>a.points),1);
+  document.getElementById('history').innerHTML=recent.map(a=>'<div class="attempt" aria-label="Attempt '+a.number+', level '+a.level+': '+a.points+' points">'+a.points+'<i style="height:'+Math.max(3,a.points/top*65)+'px"></i>#'+a.number+'<br>Lv '+a.level+'</div>').join('');
+}
+function renderHotspots(heat){
+  const grid=document.getElementById('hotspot-grid'),note=document.getElementById('hotspot-note');
+  const peak=Math.max(...heat),total=heat.reduce((a,b)=>a+b,0),hottest=peak>0?heat.indexOf(peak):-1;
+  const colors=['#272344','#504078','#7753b0','#bf549f','#f564a1','#ffad80','#ffdc75'];
+  grid.innerHTML=heat.map((n,i)=>'<span aria-hidden="true" class="hotspot-cell'+(i===hottest?' hottest':'')+'" style="background:'+colors[n&&peak?Math.max(1,Math.ceil(n/peak*6)):0]+'"></span>').join('');
+  if(!total){note.textContent='Your next launch will light up the court.';grid.setAttribute('aria-label','Ball travel heat map. No activity recorded yet.');return}
+  const sides=[0,0,0];heat.forEach((n,i)=>sides[Math.floor((i%12)/4)]+=n);
+  const busiest=sides.indexOf(Math.max(...sides)),share=Math.round(sides[busiest]/total*100);
+  const region=['upper','middle','lower'][Math.min(2,Math.floor(Math.floor(hottest/12)/8*3))]+' '+['left','middle','right'][Math.floor((hottest%12)/4)];
+  const tiedCells=heat.filter(n=>n===peak).length>1,tiedSides=sides.filter(n=>n===sides[busiest]).length>1;
+  note.textContent='★ '+(tiedCells?'One busy spot: ':'Busiest spot: ')+region+'. '+(tiedSides?'Ball time is shared most across '+sides.map((n,i)=>n===sides[busiest]?['left','middle','right'][i]:null).filter(Boolean).join(' & ')+'.':share+'% of ball time on the '+['left','middle','right'][busiest]+'.');
+  grid.setAttribute('aria-label','Ball travel heat map. Brighter cells mean more time spent there. '+note.textContent);
+}
+document.getElementById('continue').onclick=()=>{
+  const kind=pendingResult;pendingResult=null;results.close();
+  if(kind==='lost'||kind==='won')reset();
+  else if(kind==='level'){level++;load()}
+  else{startAttempt();state='ready'}
+};
+results.addEventListener('cancel',e=>e.preventDefault());
+try{best=+localStorage.getItem('bb_best')||0}catch(e){}
+let ac;
+function tone(f,d,type,v){
+  if(muted)return;
+  try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();
+  const o=ac.createOscillator(),g=ac.createGain();o.type=type||'square';o.frequency.value=f;
+  g.gain.value=v||.05;g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+d);
+  o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+d)}catch(e){}
+}
+function speed(){return(4.6+level*.35)*(variant==='B'?1.2:1)*(slow>0?.65:1)}
+function newBall(){return{x:W/2,y:H-48,ux:0,uy:0,trail:[]}}
+function load(){
+  bricks=[];
+  LEVELS[level-1].forEach((row,r)=>[...row].forEach((ch,c)=>{
+    if(ch==='.')return;
+    const ex=ch==='X';
+    bricks.push({c,r,x:OFFX+c*(BW+GAP),y:OFFY+r*(BH+GAP),hp:ex?1:+ch,ex,alive:true});
+  }));
+  balls=[newBall()];items=[];wide=0;slow=0;combo=0;state='ready';levelStart=Date.now();
+  startAttempt();log('level_start',{});hud();
+}
+function reset(){if(results.open)results.close();pendingResult=null;newBest=false;run=freshStats();attemptHistory=[];level=1;score=0;lives=3;parts=[];shake=0;paddle={w:110,h:14,x:W/2-55,y:H-30};load()}
+function hud(){
+  const $=id=>document.getElementById(id);
+  $('score').textContent=score;$('best').textContent=best;$('lvl').textContent=level;
+  $('lives').textContent='Lives '+'♥'.repeat(Math.max(lives,0));
+  $('combo').textContent=combo>=5?'Combo x'+mult():'';
+}
+function mult(){return Math.min(5,1+Math.floor(combo/5))}
+function burst(x,y,color,n){for(let i=0;i<(n||10);i++)parts.push({x,y,dx:(Math.random()-.5)*7,dy:(Math.random()-.5)*7,life:26,color})}
+function hit(b,dmg){
+  if(!b.alive)return;
+  b.hp-=dmg;
+  if(b.hp>0){tone(300,.06);return}
+  b.alive=false;combo++;attempt.bestCombo=Math.max(attempt.bestCombo,combo);run.bestCombo=Math.max(run.bestCombo,combo);score+=10*mult();tally('points',10*mult());tally('bricks');shake=Math.max(shake,b.ex?10:2);
+  burst(b.x+BW/2,b.y+BH/2,b.ex?'#ff5a36':COLORS[b.r%6],b.ex?24:10);
+  tone(b.ex?120:500+b.r*60,b.ex?.25:.08,b.ex?'sawtooth':'square');
+  if(Math.random()<.18)items.push({x:b.x+BW/2,y:b.y,k:'WMS+'[Math.floor(Math.random()*4)]});
+  if(b.ex)bricks.forEach(o=>{if(o.alive&&Math.abs(o.c-b.c)<=1&&Math.abs(o.r-b.r)<=1)hit(o,99)});
+}
+function collect(k){
+  tally('powerups');
+  tone(880,.15,'triangle',.07);log('powerup',{kind:k});
+  if(k==='W')wide=600;
+  if(k==='S')slow=480;
+  if(k==='+')lives=Math.min(5,lives+1);
+  if(k==='M'){const src=balls[0];for(let i=0;i<2;i++)balls.push({x:src.x,y:src.y,ux:Math.sin((i?.5:-.5)),uy:-Math.cos(.5),trail:[]})}
+}
+function launch(){
+  lastTick=performance.now();
+  const a=(Math.random()-.5)*.8;
+  balls[0].ux=Math.sin(a);balls[0].uy=-Math.cos(a);state='play';tone(660,.1);
+}
+function endGame(won){
+  state=won?'won':'lost';newBest=score>best;
+  if(score>best){best=score;try{localStorage.setItem('bb_best',best)}catch(e){}}
+  log(won?'game_won':'game_over',{});hud();showResults(won?'won':'lost',attemptHistory[attemptHistory.length-1]);
+}
+function update(){
+  const now=performance.now(),dt=lastTick?Math.min((now-lastTick)/1000,.1):0;lastTick=now;
+  if(results.open||document.hidden)return;
+  parts.forEach(p=>{p.x+=p.dx;p.y+=p.dy;p.life--});parts=parts.filter(p=>p.life>0);
+  shake*=.85;
+  paddle.w+=((wide>0?180:110)-paddle.w)*.15;
+  if(wide>0)wide--;if(slow>0)slow--;
+  if(state==='ready'){balls[0].x=paddle.x+paddle.w/2;balls[0].y=paddle.y-9;return}
+  if(state!=='play')return;
+  tally('seconds',dt);
+  items.forEach(i=>i.y+=2.5);
+  items=items.filter(i=>{
+    if(i.y>paddle.y-6&&i.y<paddle.y+paddle.h+10&&i.x>paddle.x&&i.x<paddle.x+paddle.w){collect(i.k);return false}
+    return i.y<H+10;
+  });
+  const v=speed();
+  for(const b of balls){
+    const cell=Math.min(7,Math.max(0,Math.floor(b.y/H*8)))*12+Math.min(11,Math.max(0,Math.floor(b.x/W*12)));
+    attempt.heat[cell]+=dt;run.heat[cell]+=dt;
+    b.trail.push([b.x,b.y]);if(b.trail.length>7)b.trail.shift();
+    b.x+=b.ux*v;b.y+=b.uy*v;
+    if(b.x<9){b.x=9;b.ux=Math.abs(b.ux)}
+    if(b.x>W-9){b.x=W-9;b.ux=-Math.abs(b.ux)}
+    if(b.y<9){b.y=9;b.uy=Math.abs(b.uy)}
+    if(b.uy>0&&b.y+9>=paddle.y&&b.y+9<=paddle.y+paddle.h+8&&b.x>paddle.x-9&&b.x<paddle.x+paddle.w+9){
+      const a=(b.x-(paddle.x+paddle.w/2))/(paddle.w/2)*Math.PI/3;
+      tally('returns');attempt.rally++;run.rally++;attempt.longest=Math.max(attempt.longest,attempt.rally);run.longest=Math.max(run.longest,run.rally);
+      const zone=Math.max(0,Math.min(4,Math.floor((b.x-paddle.x)/paddle.w*5)));attempt.contacts[zone]++;run.contacts[zone]++;
+      b.ux=Math.sin(a);b.uy=-Math.cos(a);b.y=paddle.y-9;combo=0;tone(220,.06,'triangle');
+    }
+    for(const k of bricks){
+      if(!k.alive)continue;
+      if(b.x+9>k.x&&b.x-9<k.x+BW&&b.y+9>k.y&&b.y-9<k.y+BH){
+        const ox=Math.min(b.x+9-k.x,k.x+BW-(b.x-9)),oy=Math.min(b.y+9-k.y,k.y+BH-(b.y-9));
+        if(ox<oy)b.ux*=-1;else b.uy*=-1;
+        hit(k,1);break;
+      }
+    }
+  }
+  const lost=balls.filter(b=>b.y>H+9);
+  lost.forEach(b=>{const zone=Math.max(0,Math.min(2,Math.floor(b.x/W*3)));attempt.misses[zone]++;run.misses[zone]++;attempt.rally=0;run.rally=0;log('ball_lost',{x:Math.round(b.x)})});
+  balls=balls.filter(b=>b.y<=H+9);
+  if(bricks.every(k=>!k.alive)){
+    const entry=finishAttempt();log('level_clear',{seconds:Math.round(attempt.seconds)});tone(1000,.3,'triangle',.08);state='summary';hud();
+    if(level>=LEVELS.length)return endGame(true);
+    showResults('level',entry);return;
+  }
+  if(!balls.length){
+    lives--;combo=0;shake=8;tone(110,.4,'sawtooth');log('life_lost',{lives});
+    const entry=finishAttempt();
+    if(lives<=0)return endGame(false);
+    balls=[newBall()];state='ready';wide=0;slow=0;
+    items=[];hud();showResults('life',entry);return;
+  }
+  hud();
+}
+function rr(x,y,w,h,r){ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill()}
+function draw(){
+  ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,W,H);
+  ctx.translate((Math.random()-.5)*shake,(Math.random()-.5)*shake);
+  bricks.forEach(b=>{
+    if(!b.alive)return;
+    ctx.fillStyle=b.ex?'#ff5a36':(b.hp>1?TOUGH[b.hp]:COLORS[b.r%6]);rr(b.x,b.y,BW,BH,6);
+    if(b.ex){ctx.fillStyle='#fff';ctx.font='bold 16px sans-serif';ctx.textAlign='center';ctx.fillText('✸',b.x+BW/2,b.y+17)}
+  });
+  items.forEach(i=>{
+    ctx.fillStyle='#4ade80';rr(i.x-14,i.y-9,28,18,9);
+    ctx.fillStyle='#0e0c22';ctx.font='bold 14px sans-serif';ctx.textAlign='center';ctx.fillText(i.k,i.x,i.y+5);
+  });
+  parts.forEach(p=>{ctx.globalAlpha=p.life/26;ctx.fillStyle=p.color;ctx.fillRect(p.x,p.y,4,4)});
+  ctx.globalAlpha=1;
+  ctx.fillStyle=wide>0?'#4ade80':'#f1f0fa';rr(paddle.x,paddle.y,paddle.w,paddle.h,7);
+  balls.forEach(b=>{
+    b.trail.forEach((t,i)=>{ctx.globalAlpha=i/16;ctx.fillStyle='#ffd93d';ctx.beginPath();ctx.arc(t[0],t[1],9*i/8,0,7);ctx.fill()});
+    ctx.globalAlpha=1;ctx.fillStyle=slow>0?'#38bdf8':'#ffd93d';ctx.beginPath();ctx.arc(b.x,b.y,9,0,7);ctx.fill();
+  });
+  if(state!=='play'){
+    ctx.setTransform(1,0,0,1,0,0);
+    if(state!=='ready'){ctx.fillStyle='rgba(14,12,34,.65)';ctx.fillRect(0,0,W,H)}
+    ctx.fillStyle='#f1f0fa';ctx.textAlign='center';ctx.font='bold 30px "Trebuchet MS",Verdana,sans-serif';
+    const m={ready:'Level '+level+': click to launch',won:'You won! Score '+score,lost:'Game over. Score '+score}[state];
+    ctx.fillText(m||'Your results are ready',W/2,H/2+60);
+    if(state!=='ready'){ctx.font='18px "Trebuchet MS",Verdana,sans-serif';ctx.fillText('Best '+best+'. Press Restart to play again',W/2,H/2+92)}
+  }
+}
+function move(x){const r=cv.getBoundingClientRect();paddle.x=Math.max(0,Math.min(W-paddle.w,(x-r.left)*(W/r.width)-paddle.w/2))}
+cv.addEventListener('mousemove',e=>move(e.clientX));
+cv.addEventListener('touchmove',e=>move(e.touches[0].clientX),{passive:true});
+cv.addEventListener('touchstart',e=>{move(e.touches[0].clientX);if(state==='ready')launch()},{passive:true});
+cv.addEventListener('click',()=>{if(state==='ready')launch()});
+document.getElementById('restart').onclick=()=>{log('restart',{});reset()};
+document.getElementById('mute').onclick=e=>{muted=!muted;e.target.textContent='Sound: '+(muted?'off':'on')};
+reset();
+(function loop(){update();draw();requestAnimationFrame(loop)})();
+</script>
+</body>
+</html>
